@@ -2,4 +2,6 @@ django
 tox
 Sphinx
 nose
-
+coverage
+nose
+six
