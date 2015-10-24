@@ -2,13 +2,21 @@
 <html>
 <head>
     <title>ImageDetailView</title>
+    <style>
+    	img {
+    		max-width: 100%;
+    	}
+    </style>
 </head>
 <body>
+
+{% load filters_jinja %}
 
 <h5>Name:</h5>
 {{ object.image.name }}
 
-{{ object.image|resp_img }}
+<img src="{{object.image}}"
+	 srcset="{{ object.image|resp_img }}">
 
 </body>
 </html>

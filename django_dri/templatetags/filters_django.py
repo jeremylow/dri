@@ -1,14 +1,16 @@
 import os
-
 from django.conf import settings
+from django.template import Library
 
-from django_jinja import library
+from django_dri import RESP_IMG_BREAKPOINTS
+
+register = Library()
 
 
-@library.filter
+@register.filter
 def resp_img(img):
     img = img.name
-    breakpoints = settings.RESP_IMG_BREAKPOINTS
+    breakpoints = RESP_IMG_BREAKPOINTS
     filename, ext = os.path.splitext(img)
     sources = []
     if ext == '.gif':

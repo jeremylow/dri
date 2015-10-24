@@ -13,25 +13,25 @@ from django.db import models
 from django.utils.text import slugify
 from django.core.files.storage import default_storage
 
+from django_dri import (
+    RESP_IMG_BREAKPOINTS,
+    RESP_IMG_QUALITY,
+    RESP_IMG_THREAD,
+    RESP_IMG_FILETYPES
+)
+
 import multiprocessing
 
-
 CPU_COUNT = multiprocessing.cpu_count()
-
-RESP_IMG_BREAKPOINTS = [320, 453, 579, 687, 786, 885, 975, 990]
-RESP_IMG_QUALITY = 80
-RESP_IMG_THREAD = True
-RESP_IMG_FILETYPES = ['jpg', 'jpeg', 'jpe', 'png', 'webp']
-
 conversion_queue = Queue()
 
 
 def image_converter_worker(q):
     while True:
         cmd = q.get()
-        print('got', cmd)
+        # print('got', cmd)
         subprocess.check_call(shlex.split(cmd))
-        print('finished with file')
+        # print('finished with file')
         q.task_done()
 
 
@@ -101,11 +101,9 @@ class ResponsiveImageField(models.FileField):
 
         """
 
-        print(getattr(settings, 'MEDIA_ROOT'))
         upload_path = os.path.join(
             getattr(settings, 'MEDIA_ROOT'),
             self.upload_to)
-        print(upload_path)
 
         upload_name = slugify(os.path.basename(image))
 
@@ -121,6 +119,7 @@ class ResponsiveImageField(models.FileField):
         data = super(ResponsiveImageField, self).clean(*args, **kwargs)
 
         output_name = self._get_avaible_name(data.name)
+        print(output_name)
         ext = os.path.splitext(data.name)[1]
 
         if type(data.file) == InMemoryUploadedFile:
