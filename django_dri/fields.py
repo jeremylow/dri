@@ -10,7 +10,7 @@ from django.conf import settings
 from django.core.files import File
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
-from django.utils.text import slugify
+# from django.utils.text import slugify
 from django.core.files.storage import default_storage
 
 from django_dri import (
@@ -29,9 +29,9 @@ conversion_queue = Queue()
 def image_converter_worker(q):
     while True:
         cmd = q.get()
-        # print('got', cmd)
+        print('got', cmd)
         subprocess.check_call(shlex.split(cmd))
-        # print('finished with file')
+        print('finished with file')
         q.task_done()
 
 
@@ -105,10 +105,13 @@ class ResponsiveImageField(models.FileField):
             getattr(settings, 'MEDIA_ROOT'),
             self.upload_to)
 
-        upload_name = slugify(os.path.basename(image))
+        a = os.path.basename(image)
+        b, e = os.path.splitext(a)
+
+        # upload_name = slugify(os.path.basename(image))
 
         return default_storage.get_available_name(
-            os.path.join(upload_path, upload_name))
+            os.path.join(upload_path, a))
 
     def clean(self, *args, **kwargs):
         """
@@ -118,10 +121,11 @@ class ResponsiveImageField(models.FileField):
 
         data = super(ResponsiveImageField, self).clean(*args, **kwargs)
 
-        output_name = self._get_avaible_name(data.name)
-        print(output_name)
-        ext = os.path.splitext(data.name)[1]
+        name, ext = os.path.splitext(data.name)
 
+        output_name = self._get_avaible_name(data.name)
+        basename, ext = os.path.splitext(output_name)
+        print(output_name, basename)
         if type(data.file) == InMemoryUploadedFile:
             input_file = tempfile.NamedTemporaryFile(suffix=ext, delete=False)
             [input_file.write(chunk) for chunk in data.file.chunks()]
@@ -141,12 +145,12 @@ class ResponsiveImageField(models.FileField):
                     input_name=input_file.name,
                     qual=self.quality,
                     output_dir=save_dir,
-                    output_name=output_name,
+                    output_name=basename,
                     size=breakpoint,
                     ext=ext)
                 conversion_queue.put(cmd)
 
-            data.name = output_name + ext
+            data.name = output_name
 
         except KeyError as e:
             print('Image field ({0}) not found'.format(e))
