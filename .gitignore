@@ -8,7 +8,7 @@ __pycache__/
 .vagrant/
 .vagrant/**
 .tox
-pyshk.egg-info/
+*.egg-info/
 .coverage
 .cache
 .ipynb_checkpoints/
